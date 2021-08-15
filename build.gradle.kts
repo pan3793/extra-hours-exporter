@@ -10,7 +10,8 @@ plugins {
 version = getProjectVersion()
 
 repositories {
-    maven("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/")
+    if (project.hasProperty("release")) mavenCentral()
+    else maven("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/")
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
