@@ -12,6 +12,7 @@ version = getProjectVersion()
 repositories {
     if (project.hasProperty("release")) mavenCentral()
     else maven("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/")
+    google()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
