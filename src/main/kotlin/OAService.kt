@@ -1,28 +1,27 @@
 import com.deepoove.poi.XWPFTemplate
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import okhttp3.*
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
-import java.lang.RuntimeException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.Paths
 import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
+import java.util.*
 
 object OAService {
     private const val BASE_URL: String = "https://oa.wenjuan.net"
 
     private val monthFmt = DateTimeFormatter.ofPattern("yyyy-MM")
     private val dateFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    private val timeFmt = DateTimeFormatter.ofPattern("HH:mm")
-    private val dtFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+    private val timeFmt = DateTimeFormatter.ofPattern("HH:mm:ss")
 
-    private val log: Logger = LoggerFactory.getLogger(OAService::class.java)
-
-    private val om: ObjectMapper = ObjectMapper()
+    val om: ObjectMapper = ObjectMapper()
 
     var isLogin: Boolean = false
     var userId: Int = 0
@@ -41,6 +40,14 @@ object OAService {
             }
         })
         .build()
+
+    fun export(year: Int, month: Int, reason: String, folder: Path): Path {
+        baseInfo()
+        val workDays = calculate(monthRecords(year, month))
+        val outputPath = Paths.get(folder.toString(), "加班申请单_${fullName}_%04d%02d.docx".format(year, month))
+        renderDocx(year, month, reason, workDays, outputPath)
+        return outputPath
+    }
 
     private fun loginRequest(username: String, password: String): Request {
         val form = FormBody.Builder()
@@ -84,7 +91,7 @@ object OAService {
             .build()
     }
 
-    fun baseInfo() {
+    private fun baseInfo() {
         fullName = client.newCall(baseInfoRequest()).execute().use { response ->
             if (!response.isSuccessful)
                 throw RuntimeException("Request Failed. ${response.message()}")
@@ -110,105 +117,66 @@ object OAService {
             .build()
     }
 
-    fun monthRecords(year: Int, month: Int) {
-        return client.newCall(monthRecordsRequest(year, month)).execute().use { response ->
+    private fun monthRecords(year: Int, month: Int): JsonNode =
+        client.newCall(monthRecordsRequest(year, month)).execute().use { response ->
             if (!response.isSuccessful)
                 throw RuntimeException("Request Failed. ${response.message()}")
-            val retJson = om.readTree(response.body()!!.string())
-            retJson
-//            om.readTree(retJson).get("lastname").asText()
+            om.readTree(response.body()!!.string())
         }
-    }
 
-    fun calculateOvertimeDays(year: Int, month: Int): List<WorkDay> {
-        val from = LocalDate.of(year, month, 1)
-        val until = from.plusMonths(1)
-        dateRange(from, until).map { date ->
-            val request: Request = Request.Builder()
-                .url("$BASE_URL/api/kq/myattendance/getHrmKQSignInfo")
-                .post(
-                    FormBody.Builder()
-                        .add("date", dateFmt.format(date))
-                        .build()
-                )
-                .build()
-            val response: Response = client.newCall(request).execute()
-            val retJson = response.body()!!.string()
-            if (!response.isSuccessful) {
-                log.error("request error, response code[${response.code()}]")
-                log.error(response.toString())
-            }
-
-            log.info(retJson)
-
-            om.readTree(retJson).get("data").get("signInfo")
-
-//            val signTimes: List<Pair<String, String>> = (parse(retJson) \ "data" \ "signInfo"). as [Seq[JValue]]
-//            .flatMap {
-//            sign ->
-//            (sign \ "item"). as [Seq[JValue]]
-//            .map { iv => (iv \ "title"). as [String] -> (iv \ "value"). as [String] }
-//            .filter(_._1.contains("打卡"))
-//        }
-//            WorkDay(date,
-//                signTimes.filter(_._2 != "未打卡").find(_._1 == "上班打卡")
-//                    .map { case(_, dt) => LocalDateTime.parse(dt, dtFmt).toLocalTime }.getOrElse(LocalTime.MIDNIGHT),
-//                signTimes.filter(_._2 != "未打卡").find(_._1 == "下班打卡")
-//                    .map { case(_, dt) => LocalDateTime.parse(dt, dtFmt).toLocalTime }.getOrElse(LocalTime.MIDNIGHT)
-//            )
-//        }
-//            .filter(_.isOvertime)
+    fun calculate(json: JsonNode): List<WorkDay> = json.get("result")
+        .filter { it.get("isWorkDay").asBoolean() }
+        .filter { it.get("types").size() == 1 && it.get("types").get(0).asText() == "NORMAL" }
+        .map {
+            WorkDay(
+                date = LocalDate.parse(it.get("date").asText(), dateFmt),
+                startTime = it.get("signInfo")
+                    .first { it.get("title").asText() == "上班打卡" }
+                    .let { LocalTime.parse(it.get("signTime").asText(), timeFmt) },
+                offTime = it.get("signInfo")
+                    .first { it.get("title").asText() == "下班打卡" }
+                    .let { LocalTime.parse(it.get("signTime").asText(), timeFmt) }
+            )
         }
-        return emptyList()
-    }
 
-    fun renderDocx(outputPath: Path): Unit {
+    private fun renderDocx(year: Int, month: Int, reason: String, workDays: List<WorkDay>, outputPath: Path): Unit {
         val model = mapOf<String, String>(
-//            "apply_date" to dateFmt.format(params.applyDate),
-//            "employee" to params.employee,
-//            "depart" to params.depart,
-//            "reason" to params.reason,
-//            "year" to params.year.toString,
-//            "month" to params.month.toString,
-//            "details" to overtimeDays.mkString("\n")
+            "apply_date" to dateFmt.format(LocalDateTime.now()),
+            "employee" to fullName,
+            "depart" to department,
+            "reason" to reason,
+            "year" to year.toString(),
+            "month" to month.toString(),
+            "details" to workDays.joinToString("\n")
         )
-//        val outputPath =
-//            Paths.get("", "加班申请单_${params.employee}_${year}%04d${month}%02d.docx")
         val outputFile = Files.newOutputStream(outputPath)
         XWPFTemplate
             .compile(javaClass.classLoader.getResourceAsStream("template.docx"))
             .render(model)
             .writeAndClose(outputFile)
         outputFile.close()
-        log.info("Exported to ${outputPath.toAbsolutePath()}")
     }
-
-    private fun dateRange(from: LocalDate, until: LocalDate): List<LocalDate> =
-        (from.toEpochDay() until until.toEpochDay()).map(LocalDate::ofEpochDay)
 
     data class WorkDay(val date: LocalDate, val startTime: LocalTime, val offTime: LocalTime) {
 
-        val adjustedStartTime: LocalTime =
+        private val adjustedStartTime: LocalTime =
             if (startTime.isBefore(LocalTime.parse("09:00:00"))) LocalTime.parse("09:00:00") else startTime
 
-        val startOvertime: LocalTime = adjustedStartTime.plusHours(10)
+        private val startOvertime: LocalTime = adjustedStartTime.plusHours(10)
 
-        val overtime: Duration = run {
+        private val overtime: Duration = run {
             val overMinutes = (offTime.toSecondOfDay() - startOvertime.toSecondOfDay()) / 60
+            val overHours = overMinutes / 60
             val additionMinutes: Long = if (overMinutes % 60 > 55) 60 else if (overMinutes % 60 > 25) 30 else 0
-            Duration.of(overMinutes + additionMinutes, ChronoUnit.MINUTES)
+            Duration.of(overHours * 60 + additionMinutes, ChronoUnit.MINUTES)
         }
 
-        val isOvertime: Boolean = overtime > Duration.ZERO
+        private val renderDay = "$date [${date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.ROOT)}]"
 
-        val renderDay =
-            "$date [${date.getDayOfWeek().getDisplayName(java.time.format.TextStyle.SHORT, java.util.Locale.ROOT)}]"
+        private val renderTimeRange = "${timeFmt.format(startOvertime)} - ${timeFmt.format(offTime)}"
 
-        val renderTimeRange = "${timeFmt.format(startOvertime)} - ${timeFmt.format(offTime)}"
+        private val renderOvertime = "${overtime.toMinutes().toDouble() / 60.0} Hours"
 
-        val renderOvertime = "${overtime.toMinutes().toDouble() / 60.0} Hours"
-
-        override fun toString(): String = "$renderDay $renderTimeRange | $renderOvertime"
-
+        override fun toString(): String = "$renderDay $renderTimeRange | ~$renderOvertime"
     }
 }

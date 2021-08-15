@@ -15,6 +15,7 @@ import androidx.compose.ui.window.Notification.Type.*
 import androidx.compose.ui.window.Tray
 import androidx.compose.ui.window.rememberTrayState
 import androidx.compose.ui.window.singleWindowApplication
+import java.nio.file.Paths
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -46,8 +47,13 @@ fun main() = singleWindowApplication(
             }
         }
         if (OAService.isLogin) {
-            OAService.baseInfo()
-            OAService.monthRecords(year.toInt(), month.toInt())
+            try {
+                val exportFolder = Paths.get(System.getProperty("user.home"), "Desktop")
+                val outputPath = OAService.export(year.toInt(), month.toInt(), reason, exportFolder)
+                notice(Info, "Export Complete", "Exported to ${outputPath.toString()}")
+            } catch (ex: Exception) {
+                notice(Error, "Export Failed", ex.message)
+            }
         }
     }
 
@@ -117,7 +123,6 @@ fun main() = singleWindowApplication(
                 Button(
                     modifier = Modifier.fillMaxWidth(),
                     onClick = ::onClickExport
-
                 ) {
                     Text("Export")
                 }
