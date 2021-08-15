@@ -7,8 +7,7 @@ plugins {
     id("org.jetbrains.compose") version "1.0.0-alpha3"
 }
 
-group = "io.github"
-version = "1.0"
+version = getProjectVersion()
 
 repositories {
     maven("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/")
@@ -36,7 +35,7 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.jvmTarget = if (project.hasProperty("release")) "16" else "11"
 }
 
 compose.desktop {
@@ -44,8 +43,21 @@ compose.desktop {
         mainClass = "MainKt"
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
+            includeAllModules = true
             packageName = "ExtraHoursExporter"
             packageVersion = "1.0.0"
         }
     }
+}
+
+fun isVersionFileExists(): Boolean = file("version.txt").exists()
+
+fun getVersionFromFile(): String = file("version.txt").readText().trim()
+
+fun getProjectVersion(): String {
+    if (isVersionFileExists())
+        return getVersionFromFile()
+
+    val baseVersion = "0.0.0"
+    return if (project.hasProperty("release")) baseVersion else "$baseVersion-SNAPSHOT"
 }
