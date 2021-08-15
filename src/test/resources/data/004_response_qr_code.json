@@ -1,0 +1,12 @@
+{
+  "options": {
+    "locationname": "上海",
+    "jobtitle": "开发工程师",
+    "mobile": "12398761234",
+    "telephone": "",
+    "department": "后端开发团队",
+    "email": "san.zhang@idiaoyan.com",
+    "lastname": "张三"
+  },
+  "hasQRCode": true
+}

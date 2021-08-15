@@ -1,0 +1,18 @@
+{
+  "locationshowaddress": "1",
+  "date": "2021-08-15",
+  "wificheck": true,
+  "hasCrmModule": false,
+  "messagerurl": "/messager/images/icon_m_wev8.jpg",
+  "wififacecheck": "",
+  "isFirstLocation": "1",
+  "locationfacecheck": "0",
+  "userid": 123,
+  "shortname": "",
+  "groupname": "当前所在考勤组：默认考勤组",
+  "lastname": "张三",
+  "locationcheck": true,
+  "locationcheckscope": "300",
+  "timemillis": 1629028164765,
+  "status": "1"
+}
