@@ -54,7 +54,7 @@ compose.desktop {
 
 fun isVersionFileExists(): Boolean = file("version.txt").exists()
 
-fun getVersionFromFile(): String = file("version.txt").readText().trimStart('v').trim()
+fun getVersionFromFile(): String = file("version.txt").readText().removePrefix("refs/tags/v").trim()
 
 fun getProjectVersion(): String {
     if (isVersionFileExists())
