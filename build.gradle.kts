@@ -47,19 +47,17 @@ compose.desktop {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
             includeAllModules = true
             packageName = "ExtraHoursExporter"
-            packageVersion = "1.0.0"
+            packageVersion = "${project.version}"
         }
     }
 }
 
 fun isVersionFileExists(): Boolean = file("version.txt").exists()
 
-fun getVersionFromFile(): String = file("version.txt").readText().trim()
+fun getVersionFromFile(): String = file("version.txt").readText().trimStart('v').trim()
 
 fun getProjectVersion(): String {
     if (isVersionFileExists())
         return getVersionFromFile()
-
-    val baseVersion = "0.0.0"
-    return if (project.hasProperty("release")) baseVersion else "$baseVersion-SNAPSHOT"
+    return "1.0.0"
 }

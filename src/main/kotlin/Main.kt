@@ -50,7 +50,7 @@ fun main() = singleWindowApplication(
             try {
                 val exportFolder = Paths.get(System.getProperty("user.home"), "Desktop")
                 val outputPath = OAService.export(year.toInt(), month.toInt(), reason, exportFolder)
-                notice(Info, "Export Complete", "Exported to ${outputPath.toString()}")
+                notice(Info, "Export Complete", "Exported to $outputPath")
             } catch (ex: Exception) {
                 notice(Error, "Export Failed", ex.message)
             }
