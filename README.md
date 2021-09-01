@@ -1,7 +1,14 @@
 Extra Hours Exporter
 ===
 
+## Preview
+
 ![Preview](img/preview.png)
+
+## Exported Document
+
+![Export](img/export_1.png)
+![Export](img/export_2.png)
 
 ## Usage
 
