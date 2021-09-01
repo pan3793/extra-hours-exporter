@@ -127,6 +127,7 @@ object OAService {
     fun calculate(json: JsonNode): List<WorkDay> = json.get("result")
         .filter { it.get("isWorkDay").asBoolean() }
         .filter { it.get("types").size() == 1 && it.get("types").get(0).asText() == "NORMAL" }
+        .sortedBy { it.get("date").asText() }
         .map {
             WorkDay(
                 date = LocalDate.parse(it.get("date").asText(), dateFmt),
