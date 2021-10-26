@@ -44,7 +44,7 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi)
+            targetFormats(TargetFormat.Msi)
             includeAllModules = true
             packageName = "ExtraHoursExporter"
             packageVersion = "${project.version}"

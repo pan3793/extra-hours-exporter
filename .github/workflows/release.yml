@@ -21,8 +21,12 @@ jobs:
           java-version: '16'
       - name: Set Version
         run: echo "${{ github.ref }}" > version.txt
-      - name: Make Distribution
-        run: ./gradlew package -Prelease
+      - name: Make Distribution - macOS
+        if: matrix.platform == 'macos-latest'
+        run: ./gradlew -Prelease createDistributable
+      - name: Make Distribution - Windows
+        if: matrix.platform == 'windows-latest'
+        run: ./gradlew -Prelease package
       - name: Create Release
         if: matrix.platform == 'macos-latest'
         id: create_release
@@ -40,7 +44,7 @@ jobs:
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
-            ./build/compose/binaries/main/dmg/*
+            ./build/compose/binaries/main/app/*
             ./build/compose/binaries/main/msi/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
