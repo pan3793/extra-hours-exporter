@@ -3,8 +3,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.21"
-    id("org.jetbrains.compose") version "1.0.0-alpha3"
+    kotlin("jvm") version "1.5.31"
+    id("org.jetbrains.compose") version "1.0.0-beta3"
 }
 
 version = getProjectVersion()
@@ -20,14 +20,14 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation(compose.desktop.currentOs)
     implementation("com.typesafe:config:1.4.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.4")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
     implementation("com.squareup.okhttp3:okhttp:3.12.12")
     implementation("com.deepoove:poi-tl:1.10.0")
 
-    implementation("org.slf4j:slf4j-api:1.7.25")
-    implementation("org.slf4j:jul-to-slf4j:1.7.25")
-    implementation("org.slf4j:jcl-over-slf4j:1.7.25")
-    implementation("ch.qos.logback:logback-classic:1.2.3")
+    implementation("org.slf4j:slf4j-api:1.7.32")
+    implementation("org.slf4j:jul-to-slf4j:1.7.32")
+    implementation("org.slf4j:jcl-over-slf4j:1.7.32")
+    implementation("ch.qos.logback:logback-classic:1.2.6")
 
     testImplementation(kotlin("test"))
 }
