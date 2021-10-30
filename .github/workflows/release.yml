@@ -23,7 +23,7 @@ jobs:
         run: echo "${{ github.ref }}" > version.txt
       - name: Make Distribution - macOS
         if: matrix.platform == 'macos-latest'
-        run: >-
+        run: |
           ./gradlew -Prelease createDistributable
           cd ./build/compose/binaries/main/app
           REF=${{ github.ref }}
