@@ -20,10 +20,16 @@ jobs:
         with:
           java-version: '16'
       - name: Set Version
-        run: echo "${{ github.ref }}" > version.txt
+        run: >-
+          REF=${{ github.ref }}"
+          echo "${REF#refs/tags/v}" > version.txt
       - name: Make Distribution - macOS
         if: matrix.platform == 'macos-latest'
-        run: ./gradlew -Prelease createDistributable
+        run: >-
+          ./gradlew -Prelease createDistributable
+          cd ./build/compose/binaries/main/app
+          REF=${{ github.ref }}"
+          tar -czf ExtraHoursExporter-${REF#refs/tags/v}.tgz ExtraHoursExporter.app
       - name: Make Distribution - Windows
         if: matrix.platform == 'windows-latest'
         run: ./gradlew -Prelease package
@@ -44,7 +50,7 @@ jobs:
           draft: true
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
-            ./build/compose/binaries/main/app/*
+            ./build/compose/binaries/main/app/*.tgz
             ./build/compose/binaries/main/msi/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
