@@ -20,9 +20,7 @@ jobs:
         with:
           java-version: '16'
       - name: Set Version
-        run: >-
-          REF=${{ github.ref }}
-          echo "${REF#refs/tags/v}" > version.txt
+        run: echo "${{ github.ref }}" > version.txt
       - name: Make Distribution - macOS
         if: matrix.platform == 'macos-latest'
         run: >-

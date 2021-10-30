@@ -54,10 +54,10 @@ compose.desktop {
 
 fun isVersionFileExists(): Boolean = file("version.txt").exists()
 
-fun getVersionFromFile(): String = file("version.txt").readText().trim()
+fun getVersionFromFile(): String = file("version.txt").readText().removePrefix("refs/tags/v").trim()
 
 fun getProjectVersion(): String {
     if (isVersionFileExists())
         return getVersionFromFile()
-    return "0.0.0"
+    return "1.0.0"
 }
