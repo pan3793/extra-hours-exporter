@@ -21,14 +21,14 @@ jobs:
           java-version: '16'
       - name: Set Version
         run: >-
-          REF=${{ github.ref }}"
+          REF=${{ github.ref }}
           echo "${REF#refs/tags/v}" > version.txt
       - name: Make Distribution - macOS
         if: matrix.platform == 'macos-latest'
         run: >-
           ./gradlew -Prelease createDistributable
           cd ./build/compose/binaries/main/app
-          REF=${{ github.ref }}"
+          REF=${{ github.ref }}
           tar -czf ExtraHoursExporter-${REF#refs/tags/v}.tgz ExtraHoursExporter.app
       - name: Make Distribution - Windows
         if: matrix.platform == 'windows-latest'
