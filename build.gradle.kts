@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0-beta5"
+    id("org.jetbrains.compose") version "1.0.0-rc2"
 }
 
 version = getProjectVersion()
@@ -13,7 +13,6 @@ repositories {
     if (project.hasProperty("release")) mavenCentral()
     else maven("https://mirrors.cloud.tencent.com/nexus/repository/maven-public/")
     google()
-    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
 dependencies {
@@ -22,12 +21,12 @@ dependencies {
     implementation("com.typesafe:config:1.4.1")
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
     implementation("com.squareup.okhttp3:okhttp:3.12.12")
-    implementation("com.deepoove:poi-tl:1.10.0")
+    implementation("com.deepoove:poi-tl:1.10.1")
 
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.slf4j:jul-to-slf4j:1.7.32")
     implementation("org.slf4j:jcl-over-slf4j:1.7.32")
-    implementation("ch.qos.logback:logback-classic:1.2.6")
+    implementation("ch.qos.logback:logback-classic:1.2.7")
 
     testImplementation(kotlin("test"))
 }
@@ -37,7 +36,7 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = if (project.hasProperty("release")) "16" else "11"
+    kotlinOptions.jvmTarget = "16"
 }
 
 compose.desktop {
