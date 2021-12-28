@@ -3,8 +3,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0"
+    kotlin("jvm") version "1.6.10"
+    id("org.jetbrains.compose") version "1.0.1"
 }
 
 version = getProjectVersion()
@@ -19,14 +19,14 @@ dependencies {
     implementation(kotlin("reflect"))
     implementation(compose.desktop.currentOs)
     implementation("com.typesafe:config:1.4.1")
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.1")
     implementation("com.squareup.okhttp3:okhttp:3.12.12")
     implementation("com.deepoove:poi-tl:1.10.1")
 
     implementation("org.slf4j:slf4j-api:1.7.32")
     implementation("org.slf4j:jul-to-slf4j:1.7.32")
     implementation("org.slf4j:jcl-over-slf4j:1.7.32")
-    implementation("ch.qos.logback:logback-classic:1.2.7")
+    implementation("ch.qos.logback:logback-classic:1.2.10")
 
     testImplementation(kotlin("test"))
 }
@@ -36,7 +36,7 @@ tasks.test {
 }
 
 tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "16"
+    kotlinOptions.jvmTarget = "17"
 }
 
 compose.desktop {
